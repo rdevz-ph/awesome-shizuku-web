@@ -27,11 +27,11 @@ export function ShareAppModal({ app, isOpen, onClose }: ShareAppModalProps) {
   if (!isOpen || !app) return null;
 
   const catalogUrl = origin ? `${origin}/apps/${app.slug}` : `/apps/${app.slug}`;
-  const badgeImageUrl = "https://img.shields.io/badge/Get%20it%20on-ShizuStore-18181b?style=for-the-badge&logo=android&logoColor=white";
+  const badgeImageUrl = origin ? `${origin}/get-it-on-shizustore.png` : "/get-it-on-shizustore.png";
 
   const markdownBadgeSnippet = `[![Get it on ShizuStore](${badgeImageUrl})](${catalogUrl})`;
   const markdownLinkSnippet = `[Get it on ShizuStore - ${app.name}](${catalogUrl})`;
-  const htmlSnippet = `<a href="${catalogUrl}" target="_blank" rel="noopener noreferrer"><img src="${badgeImageUrl}" alt="Get it on ShizuStore" /></a>`;
+  const htmlSnippet = `<a href="${catalogUrl}" target="_blank" rel="noopener noreferrer"><img src="${badgeImageUrl}" alt="Get it on ShizuStore" width="200" /></a>`;
 
   const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -71,12 +71,12 @@ export function ShareAppModal({ app, isOpen, onClose }: ShareAppModalProps) {
         </div>
 
         {/* Live Badge Preview */}
-        <div className="p-4 rounded-xl border border-border bg-secondary/30 flex flex-col items-center justify-center gap-2">
+        <div className="py-6 px-4 rounded-xl border border-border bg-secondary/30 flex flex-col items-center justify-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={badgeImageUrl}
             alt="Get it on ShizuStore"
-            className="h-8 shadow-xs rounded"
+            className="h-20 sm:h-24 w-auto max-w-full object-contain filter drop-shadow-sm"
           />
         </div>
 
