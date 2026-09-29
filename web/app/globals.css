@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #09090b;
+
+    --card: #ffffff;
+    --card-foreground: #09090b;
+
+    --popover: #ffffff;
+    --popover-foreground: #09090b;
+
+    --primary: #18181b;
+    --primary-foreground: #fafafa;
+
+    --secondary: #f4f4f5;
+    --secondary-foreground: #18181b;
+
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+
+    --accent: #e4e4e7;
+    --accent-foreground: #18181b;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #fafafa;
+
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #18181b;
+
+    --radius: 1rem;
+  }
+
+  [data-theme="dark"] {
+    /* Pure deep background as seen on ui.shadcn.com */
+    --background: #000000;
+    --foreground: #ffffff;
+
+    /* Elevated charcoal card surface */
+    --card: #121215;
+    --card-foreground: #ffffff;
+
+    --popover: #121215;
+    --popover-foreground: #ffffff;
+
+    /* Crisp solid primary */
+    --primary: #ffffff;
+    --primary-foreground: #000000;
+
+    /* Inner pill/button surface */
+    --secondary: #1a1a1f;
+    --secondary-foreground: #e4e4e7;
+
+    --muted: #141418;
+    --muted-foreground: #a1a1aa;
+
+    --accent: #24242c;
+    --accent-foreground: #ffffff;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    /* Subtle refined borders */
+    --border: rgba(255, 255, 255, 0.08);
+    --input: rgba(255, 255, 255, 0.12);
+    --ring: rgba(255, 255, 255, 0.25);
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Shadcn Cardview */
+.shadcn-cardview {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+[data-theme="dark"] .shadcn-cardview:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  background-color: #16161a;
+}
+
+[data-theme="light"] .shadcn-cardview {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .shadcn-cardview:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Authentic Shadcn Pills */
+.shadcn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  height: 2rem;
+  padding: 0 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  border: 1px solid #e4e4e7;
+  background-color: #f4f4f5;
+  color: #3f3f46;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .shadcn-pill {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: #18181b;
+  color: #a1a1aa;
+}
+
+.shadcn-pill:hover {
+  background-color: #e4e4e7;
+  color: #09090b;
+  border-color: #d4d4d8;
+}
+
+[data-theme="dark"] .shadcn-pill:hover {
+  background-color: #27272a;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.shadcn-pill-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  height: 2rem;
+  padding: 0 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid #18181b;
+  background-color: #18181b;
+  color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .shadcn-pill-active {
+  border-color: #ffffff;
+  background-color: #ffffff;
+  color: #09090b;
+  box-shadow: 0 1px 3px 0 rgba(255, 255, 255, 0.15);
+}
+
+.shadcn-pill-active:hover {
+  opacity: 0.92;
+}
+
+/* Category counter inside pill */
+.shadcn-pill-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  line-height: 1;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #71717a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+[data-theme="dark"] .shadcn-pill-count {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+}
+
+.shadcn-pill-count-active {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  line-height: 1;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+[data-theme="dark"] .shadcn-pill-count-active {
+  background-color: rgba(0, 0, 0, 0.15);
+  color: #09090b;
+}
+
+/* Subtle scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--input);
+  border-radius: 9999px;
+}
