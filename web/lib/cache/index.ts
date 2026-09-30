@@ -4,6 +4,7 @@ import { CatalogData, AppItem, CategoryItem } from "@/lib/types";
 import { fetchAwesomeShizukuSources } from "@/lib/awesome-shizuku/source";
 import { parseAwesomeShizuku } from "@/lib/awesome-shizuku/parser";
 import { normalizeApp, ShizuBackendApp } from "@/lib/metadata/normalize";
+import { fetchLiveRepoReadme } from "@/lib/metadata/readme";
 
 const CACHE_DIR = path.join(process.cwd(), ".cache");
 const CACHE_FILE = path.join(CACHE_DIR, "catalog.json");
@@ -210,43 +211,56 @@ export async function getCatalog(): Promise<CatalogData> {
 export async function getAppBySlug(slug: string): Promise<AppItem | null> {
   const catalog = await getCatalog();
   const normalizedSlug = decodeURIComponent(slug).toLowerCase();
-  const app =
+  const baseApp =
     catalog.apps.find((a) => a.slug.toLowerCase() === normalizedSlug) || null;
 
-  if (!app) return null;
+  if (!baseApp) return null;
 
-  // Enrich with live backend app details if screenshots are not yet populated
-  if (!app.screenshots || app.screenshots.length === 0) {
-    try {
-      const res = await fetch(
-        `https://shizustore.timschneeberger.me/v1/apps/${encodeURIComponent(app.slug)}`,
-        {
-          headers: { "User-Agent": "ShizuStoreWeb/1.0" },
-          next: { revalidate: 3600 },
-        }
-      );
-      if (res.ok) {
-        const detail = await res.json();
-        if (Array.isArray(detail.screenshots) && detail.screenshots.length > 0) {
-          app.screenshots = detail.screenshots;
-        }
-        if (detail.fullDescription && !app.fullDescription) {
-          app.fullDescription = detail.fullDescription;
-        }
-        if (detail.changelog && !app.changelog) {
-          app.changelog = detail.changelog;
-        }
-        if (
-          Array.isArray(detail.permissions) &&
-          detail.permissions.length > 0 &&
-          (!app.permissions || app.permissions.length === 0)
-        ) {
-          app.permissions = detail.permissions;
+  // Shallow copy to avoid mutating the base catalog item in memory
+  const app: AppItem = { ...baseApp };
+
+  // Fetch live README directly from app repository and backend enrichment in parallel
+  const [liveReadmeResult] = await Promise.allSettled([
+    fetchLiveRepoReadme(app),
+    (async () => {
+      if (!app.screenshots || app.screenshots.length === 0) {
+        try {
+          const res = await fetch(
+            `https://shizustore.timschneeberger.me/v1/apps/${encodeURIComponent(app.slug)}`,
+            {
+              headers: { "User-Agent": "ShizuStoreWeb/1.0" },
+              next: { revalidate: 3600 },
+            }
+          );
+          if (res.ok) {
+            const detail = await res.json();
+            if (Array.isArray(detail.screenshots) && detail.screenshots.length > 0) {
+              app.screenshots = detail.screenshots;
+            }
+            if (detail.fullDescription && !app.fullDescription) {
+              app.fullDescription = detail.fullDescription;
+            }
+            if (detail.changelog && !app.changelog) {
+              app.changelog = detail.changelog;
+            }
+            if (
+              Array.isArray(detail.permissions) &&
+              detail.permissions.length > 0 &&
+              (!app.permissions || app.permissions.length === 0)
+            ) {
+              app.permissions = detail.permissions;
+            }
+          }
+        } catch {
+          // Fallback silently if offline or backend is unreachable
         }
       }
-    } catch {
-      // Fallback silently if offline or backend is unreachable
-    }
+    })(),
+  ]);
+
+  // Prioritize live repo README if found
+  if (liveReadmeResult.status === "fulfilled" && liveReadmeResult.value) {
+    app.fullDescription = liveReadmeResult.value;
   }
 
   return app;
