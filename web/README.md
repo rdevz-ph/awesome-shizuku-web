@@ -44,10 +44,10 @@ This project relies on the incredible work of the Shizuku and Android open-sourc
 
 ### Installation
 
-1. Clone the repository:
+1. Clone the repository and navigate to the web directory:
    ```bash
-   git clone https://github.com/rdevz-ph/shizu-store-web.git
-   cd shizu-store-web
+   git clone https://github.com/rdevz-ph/awesome-shizuku-web.git
+   cd awesome-shizuku-web/web
    ```
 
 2. Install dependencies:

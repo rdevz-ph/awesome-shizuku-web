@@ -3,6 +3,7 @@
 import React, { useState, useSyncExternalStore } from "react";
 import { X, Check, Copy, Share2 } from "lucide-react";
 import { AppItem } from "@/lib/types";
+import { getShizuStoreDeepLink } from "@/lib/deeplink";
 
 interface ShareAppModalProps {
   app: AppItem | null;
@@ -10,7 +11,7 @@ interface ShareAppModalProps {
   onClose: () => void;
 }
 
-type ShareFormat = "badge" | "markdown" | "url" | "html";
+type ShareFormat = "badge" | "deeplink" | "markdown" | "url" | "html";
 
 const subscribeEmpty = () => () => {};
 
@@ -27,6 +28,7 @@ export function ShareAppModal({ app, isOpen, onClose }: ShareAppModalProps) {
   if (!isOpen || !app) return null;
 
   const catalogUrl = origin ? `${origin}/apps/${app.slug}` : `/apps/${app.slug}`;
+  const deepLink = app.shizuStoreDeepLink || getShizuStoreDeepLink(app.slug, app.packageName);
   const badgeImageUrl = origin ? `${origin}/get-it-on-shizustore.png` : "/get-it-on-shizustore.png";
 
   const markdownBadgeSnippet = `[![Get it on ShizuStore](${badgeImageUrl})](${catalogUrl})`;
@@ -81,13 +83,21 @@ export function ShareAppModal({ app, isOpen, onClose }: ShareAppModalProps) {
         </div>
 
         {/* Format Selector Pills */}
-        <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-secondary/40 border border-border/60">
+        <div className="grid grid-cols-5 gap-1 p-1 rounded-xl bg-secondary/40 border border-border/60">
           <button
             type="button"
             onClick={() => setActiveTab("badge")}
             className={activeTab === "badge" ? "shadcn-pill-active justify-center text-center w-full" : "shadcn-pill justify-center text-center w-full border-transparent bg-transparent"}
           >
             <span>Badge</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("deeplink")}
+            className={activeTab === "deeplink" ? "shadcn-pill-active justify-center text-center w-full" : "shadcn-pill justify-center text-center w-full border-transparent bg-transparent"}
+          >
+            <span>Deep Link</span>
           </button>
 
           <button
@@ -140,6 +150,39 @@ export function ShareAppModal({ app, isOpen, onClose }: ShareAppModalProps) {
                     <>
                       <Copy className="w-3.5 h-3.5" />
                       <span>Copy Badge</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "deeplink" && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">
+                  Direct ShizuStore protocol URL (v1.4.0+):
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground">shizustore://</span>
+              </div>
+              <div className="relative">
+                <pre className="p-3 rounded-lg bg-background border border-border text-xs font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all pr-24">
+                  {deepLink}
+                </pre>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(deepLink, "deeplink")}
+                  className="absolute top-2.5 right-2.5 h-7 px-2.5 rounded-md bg-secondary hover:bg-secondary/80 text-foreground text-xs font-medium flex items-center gap-1.5 transition-colors border border-border"
+                >
+                  {copiedKey === "deeplink" ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Link</span>
                     </>
                   )}
                 </button>

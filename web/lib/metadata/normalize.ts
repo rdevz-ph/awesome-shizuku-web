@@ -2,6 +2,7 @@ import { AppItem } from "@/lib/types";
 import { ParsedRawApp, slugify } from "@/lib/awesome-shizuku/parser";
 import { parseGitHubRepo, GitHubRepoMeta } from "@/lib/github/api";
 import { parseGitLabRepo, GitLabRepoMeta } from "@/lib/gitlab/api";
+import { getShizuStoreDeepLink } from "@/lib/deeplink";
 
 export interface ShizuBackendApp {
   slug: string;
@@ -147,7 +148,7 @@ export function normalizeApp(
   }
 
   const slug = backend?.slug || baseSlug;
-  const deepLink = `shizustore://app/${slug}`;
+  const deepLink = getShizuStoreDeepLink(slug, backend?.packageName);
 
   return {
     slug,

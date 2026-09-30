@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import {
   Download,
@@ -11,18 +11,24 @@ import {
   Smartphone,
   ArrowLeft,
   ChevronRight,
+  ChevronLeft,
   FileCode,
   Globe,
   Package,
   Info,
   CheckCircle2,
   Share2,
+  Image as ImageIcon,
+  ZoomIn,
+  X,
+  ChevronDown,
 } from "lucide-react";
 import { GithubIcon, GitlabIcon } from "./Icons";
 import { AppItem } from "@/lib/types";
 import { DeepLinkModal } from "./DeepLinkModal";
 import { ShareAppModal } from "./ShareAppModal";
 import { AppCard } from "./AppCard";
+import { MarkdownViewer } from "./MarkdownViewer";
 
 interface AppDetailViewProps {
   app: AppItem;
@@ -33,6 +39,10 @@ export function AppDetailView({ app, relatedApps }: AppDetailViewProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState<number | null>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isChangelogExpanded, setIsChangelogExpanded] = useState(false);
+  const screenshotScrollRef = useRef<HTMLDivElement>(null);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return null;
@@ -41,6 +51,13 @@ export function AppDetailView({ app, relatedApps }: AppDetailViewProps) {
       return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
     } catch {
       return null;
+    }
+  };
+
+  const scrollScreenshots = (direction: "left" | "right") => {
+    if (screenshotScrollRef.current) {
+      const scrollAmount = direction === "left" ? -320 : 320;
+      screenshotScrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
 
@@ -53,6 +70,12 @@ export function AppDetailView({ app, relatedApps }: AppDetailViewProps) {
   const otherPermissions = app.permissions?.filter(
     (p) => !p.toLowerCase().includes("shizuku") && !p.toLowerCase().includes("dhizuku")
   ) || [];
+
+  const descriptionContent = app.fullDescription || app.description || "";
+  const isLongDescription = descriptionContent.length > 350 || descriptionContent.split("\n").length > 6;
+
+  const changelogContent = app.changelog || app.releaseNotes || "";
+  const isLongChangelog = changelogContent.length > 350 || changelogContent.split("\n").length > 6;
 
   return (
     <div className="space-y-8">
@@ -262,27 +285,158 @@ export function AppDetailView({ app, relatedApps }: AppDetailViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Description, Changelog, Permissions (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Screenshots Gallery */}
+          {app.screenshots && app.screenshots.length > 0 && (
+            <div className="shadcn-cardview p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-sm font-semibold text-foreground">
+                    Screenshots
+                  </h2>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    ({app.screenshots.length})
+                  </span>
+                </div>
+                {app.screenshots.length > 2 && (
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => scrollScreenshots("left")}
+                      aria-label="Scroll left"
+                      className="p-1 rounded-lg border border-border bg-secondary hover:bg-accent text-foreground transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollScreenshots("right")}
+                      aria-label="Scroll right"
+                      className="p-1 rounded-lg border border-border bg-secondary hover:bg-accent text-foreground transition-colors cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Scrollable Screenshots Strip */}
+              <div
+                ref={screenshotScrollRef}
+                className="flex items-center gap-3.5 overflow-x-auto pb-2 pt-1 scroll-smooth snap-x snap-mandatory focus:outline-none"
+                tabIndex={0}
+              >
+                {app.screenshots.map((url, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedScreenshotIndex(idx)}
+                    className="relative shrink-0 snap-center rounded-xl overflow-hidden border border-border bg-secondary/30 shadow-xs hover:border-foreground/40 hover:shadow-md transition-all group focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                    title={`View screenshot ${idx + 1}`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={url}
+                      alt={`${app.name} screenshot ${idx + 1}`}
+                      className="h-64 sm:h-72 w-auto max-w-none object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="p-2 rounded-full bg-background/90 text-foreground shadow-md backdrop-blur-xs">
+                        <ZoomIn className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Description Section */}
-          <div className="shadcn-cardview p-6 space-y-3">
+          <div className="shadcn-cardview p-6 space-y-4">
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Info className="w-4 h-4 text-muted-foreground" />
               About Application
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-              {app.fullDescription || app.description}
-            </p>
+
+            <div className="relative">
+              <div
+                className={`transition-all duration-300 ${
+                  isLongDescription && !isDescriptionExpanded
+                    ? "max-h-80 overflow-hidden"
+                    : ""
+                }`}
+              >
+                <MarkdownViewer
+                  content={descriptionContent}
+                  repoOwner={app.repoOwner}
+                  repoName={app.repoName}
+                />
+              </div>
+
+              {isLongDescription && !isDescriptionExpanded && (
+                <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-card via-card/80 to-transparent pointer-events-none" />
+              )}
+            </div>
+
+            {isLongDescription && (
+              <button
+                type="button"
+                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                className="w-full py-2 px-4 rounded-xl border border-border bg-secondary/40 hover:bg-secondary text-foreground text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>{isDescriptionExpanded ? "Show Less" : "Show Full Description"}</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    isDescriptionExpanded ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            )}
           </div>
 
           {/* Changelog / Release Notes */}
-          {(app.changelog || app.releaseNotes) && (
-            <div className="shadcn-cardview p-6 space-y-3">
+          {changelogContent && (
+            <div className="shadcn-cardview p-6 space-y-4">
               <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Tag className="w-4 h-4 text-muted-foreground" />
                 Release Notes & Changelog
               </h2>
-              <div className="p-4 rounded-xl bg-secondary/60 text-xs text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto">
-                {app.changelog || app.releaseNotes}
+
+              <div className="relative">
+                <div
+                  className={`transition-all duration-300 ${
+                    isLongChangelog && !isChangelogExpanded
+                      ? "max-h-72 overflow-hidden"
+                      : ""
+                  }`}
+                >
+                  <MarkdownViewer
+                    content={changelogContent}
+                    repoOwner={app.repoOwner}
+                    repoName={app.repoName}
+                  />
+                </div>
+
+                {isLongChangelog && !isChangelogExpanded && (
+                  <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-card via-card/80 to-transparent pointer-events-none" />
+                )}
               </div>
+
+              {isLongChangelog && (
+                <button
+                  type="button"
+                  onClick={() => setIsChangelogExpanded(!isChangelogExpanded)}
+                  className="w-full py-2 px-4 rounded-xl border border-border bg-secondary/40 hover:bg-secondary text-foreground text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <span>{isChangelogExpanded ? "Show Less" : "Show Full Changelog"}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isChangelogExpanded ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              )}
             </div>
           )}
 
@@ -508,6 +662,74 @@ export function AppDetailView({ app, relatedApps }: AppDetailViewProps) {
         isOpen={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
       />
+
+      {/* Screenshot Lightbox Modal */}
+      {selectedScreenshotIndex !== null && app.screenshots && app.screenshots[selectedScreenshotIndex] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSelectedScreenshotIndex(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[92vh] flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Bar with Counter and Close */}
+            <div className="w-full flex items-center justify-between pb-3 text-white text-xs">
+              <span className="font-mono bg-white/10 px-2.5 py-1 rounded-md">
+                {selectedScreenshotIndex + 1} / {app.screenshots.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedScreenshotIndex(null)}
+                aria-label="Close preview"
+                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Image Preview with Nav Arrows */}
+            <div className="relative flex items-center justify-center">
+              {app.screenshots.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedScreenshotIndex(
+                      (selectedScreenshotIndex - 1 + app.screenshots!.length) % app.screenshots!.length
+                    )
+                  }
+                  aria-label="Previous screenshot"
+                  className="absolute -left-12 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 transition-colors hidden sm:flex cursor-pointer"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={app.screenshots[selectedScreenshotIndex]}
+                alt={`${app.name} screenshot ${selectedScreenshotIndex + 1}`}
+                className="max-h-[82vh] max-w-[85vw] object-contain rounded-xl shadow-2xl border border-white/10"
+              />
+
+              {app.screenshots.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedScreenshotIndex((selectedScreenshotIndex + 1) % app.screenshots!.length)
+                  }
+                  aria-label="Next screenshot"
+                  className="absolute -right-12 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 transition-colors hidden sm:flex cursor-pointer"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

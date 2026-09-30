@@ -117,13 +117,24 @@ export function Footer() {
             <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li>
                 <a
+                  href="https://github.com/rdevz-ph/awesome-shizuku-web"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground flex items-center gap-1.5"
+                >
+                  <GithubIcon className="w-3.5 h-3.5" />
+                  Web Catalog Source
+                </a>
+              </li>
+              <li>
+                <a
                   href="https://github.com/timschneeb/awesome-shizuku"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-foreground flex items-center gap-1.5"
                 >
                   <GithubIcon className="w-3.5 h-3.5" />
-                  awesome-shizuku
+                  awesome-shizuku (Upstream)
                 </a>
               </li>
               <li>
@@ -151,7 +162,7 @@ export function Footer() {
 
         <div className="mt-8 pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} ShizuPortal. Curated catalog for Shizuku apps.</p>
-          <p className="font-mono text-[11px]">Shadcn Neutral</p>
+          <p className="font-mono text-[11px]">UI Inspired by Shadcn Neutral</p>
         </div>
       </div>
     </footer>

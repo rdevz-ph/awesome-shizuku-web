@@ -58,11 +58,23 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* GitHub Repository */}
+          <a
+            href="https://github.com/rdevz-ph/awesome-shizuku-web"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub Repository"
+            title="View web source code on GitHub"
+            className="h-8 w-8 rounded-md bg-muted/40 flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+          >
+            <GithubIcon className="w-4 h-4" />
+          </a>
+
           {/* Theme Switcher */}
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="h-8 w-8 rounded-md bg-muted/40 flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+            className="h-8 w-8 rounded-md bg-muted/40 flex items-center justify-center text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             {theme === "dark" ? (
               <Sun className="w-3.5 h-3.5 text-foreground" />
@@ -119,6 +131,15 @@ export function Navbar() {
             className="flex items-center justify-between text-xs font-medium text-muted-foreground hover:text-foreground py-1"
           >
             <span>awesome-shizuku upstream</span>
+            <GithubIcon className="w-3.5 h-3.5" />
+          </a>
+          <a
+            href="https://github.com/rdevz-ph/awesome-shizuku-web"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between text-xs font-medium text-muted-foreground hover:text-foreground py-1"
+          >
+            <span>Web Source Code</span>
             <GithubIcon className="w-3.5 h-3.5" />
           </a>
           <div className="pt-2">

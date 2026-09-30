@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Download, X, Smartphone, Check, Copy, ExternalLink, Code2, Globe } from "lucide-react";
 import { AppItem } from "@/lib/types";
 
+import { getShizuStoreDeepLink } from "@/lib/deeplink";
+
 interface DeepLinkModalProps {
   app: AppItem | null;
   isOpen: boolean;
@@ -11,16 +13,17 @@ interface DeepLinkModalProps {
 }
 
 export function DeepLinkModal({ app, isOpen, onClose }: DeepLinkModalProps) {
-  const [copiedPackage, setCopiedPackage] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<"package" | "deeplink" | null>(null);
 
   if (!isOpen || !app) return null;
 
   const searchQuery = app.packageName || app.name;
+  const deepLink = app.shizuStoreDeepLink || getShizuStoreDeepLink(app.slug, app.packageName);
 
-  const copySearchTerm = () => {
-    navigator.clipboard.writeText(searchQuery);
-    setCopiedPackage(true);
-    setTimeout(() => setCopiedPackage(false), 2000);
+  const handleCopy = (text: string, key: "package" | "deeplink") => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
   };
 
   return (
@@ -71,50 +74,103 @@ export function DeepLinkModal({ app, isOpen, onClose }: DeepLinkModalProps) {
 
         {/* ShizuStore Guide Box */}
         <div className="p-4 rounded-xl border border-border bg-secondary/50 space-y-3">
-          <div className="flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-foreground shrink-0" />
-            <span className="text-xs font-semibold text-foreground">
-              Install via ShizuStore (Recommended)
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-foreground shrink-0" />
+              <span className="text-xs font-semibold text-foreground">
+                Install via ShizuStore
+              </span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary border border-border text-muted-foreground font-mono">
+              v1.4.0+
             </span>
           </div>
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Open the <strong>ShizuStore</strong> app on your Android device and search for this package to install with Shizuku permissions:
+            Open directly in ShizuStore on your Android device to install silently with Shizuku permissions:
           </p>
 
-          <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-background border border-border">
-            <span className="text-xs font-mono text-foreground truncate select-all">
-              {searchQuery}
-            </span>
-            <button
-              onClick={copySearchTerm}
-              type="button"
-              className="px-2.5 py-1 rounded-md bg-secondary hover:bg-secondary/80 text-foreground text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
-              title="Copy search query"
-            >
-              {copiedPackage ? (
-                <>
-                  <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
+          {/* Direct Custom Protocol Deep Link */}
+          <a
+            href={deepLink}
+            className="w-full h-9 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold flex items-center justify-center gap-2 transition-opacity"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Open in ShizuStore App</span>
+          </a>
+
+          {/* Deep link copy box */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+              <span>Direct Deep Link:</span>
+              <span className="text-[10px] font-mono text-muted-foreground">shizustore://</span>
+            </div>
+            <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-background border border-border">
+              <span className="text-xs font-mono text-foreground truncate select-all">
+                {deepLink}
+              </span>
+              <button
+                onClick={() => handleCopy(deepLink, "deeplink")}
+                type="button"
+                className="px-2.5 py-1 rounded-md bg-secondary hover:bg-secondary/80 text-foreground text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
+                title="Copy deep link URL"
+              >
+                {copiedKey === "deeplink" ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
-          <a
-            href="https://github.com/timschneeb/ShizuStore/releases/latest"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full h-8 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium flex items-center justify-center gap-1.5 transition-opacity"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Download ShizuStore APK</span>
-          </a>
+          {/* Manual Package Search */}
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[11px] text-muted-foreground block">
+              Or search manually in ShizuStore:
+            </span>
+            <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-background border border-border">
+              <span className="text-xs font-mono text-foreground truncate select-all">
+                {searchQuery}
+              </span>
+              <button
+                onClick={() => handleCopy(searchQuery, "package")}
+                type="button"
+                className="px-2.5 py-1 rounded-md bg-secondary hover:bg-secondary/80 text-foreground text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
+                title="Copy search query"
+              >
+                {copiedKey === "package" ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-border/60">
+            <a
+              href="https://github.com/timschneeb/ShizuStore/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full h-8 rounded-lg border border-border bg-background hover:bg-secondary text-foreground text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Need the app? Download ShizuStore APK</span>
+            </a>
+          </div>
         </div>
 
         {/* Direct Source Links */}

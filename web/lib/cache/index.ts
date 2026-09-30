@@ -210,9 +210,46 @@ export async function getCatalog(): Promise<CatalogData> {
 export async function getAppBySlug(slug: string): Promise<AppItem | null> {
   const catalog = await getCatalog();
   const normalizedSlug = decodeURIComponent(slug).toLowerCase();
-  return (
-    catalog.apps.find((a) => a.slug.toLowerCase() === normalizedSlug) || null
-  );
+  const app =
+    catalog.apps.find((a) => a.slug.toLowerCase() === normalizedSlug) || null;
+
+  if (!app) return null;
+
+  // Enrich with live backend app details if screenshots are not yet populated
+  if (!app.screenshots || app.screenshots.length === 0) {
+    try {
+      const res = await fetch(
+        `https://shizustore.timschneeberger.me/v1/apps/${encodeURIComponent(app.slug)}`,
+        {
+          headers: { "User-Agent": "ShizuStoreWeb/1.0" },
+          next: { revalidate: 3600 },
+        }
+      );
+      if (res.ok) {
+        const detail = await res.json();
+        if (Array.isArray(detail.screenshots) && detail.screenshots.length > 0) {
+          app.screenshots = detail.screenshots;
+        }
+        if (detail.fullDescription && !app.fullDescription) {
+          app.fullDescription = detail.fullDescription;
+        }
+        if (detail.changelog && !app.changelog) {
+          app.changelog = detail.changelog;
+        }
+        if (
+          Array.isArray(detail.permissions) &&
+          detail.permissions.length > 0 &&
+          (!app.permissions || app.permissions.length === 0)
+        ) {
+          app.permissions = detail.permissions;
+        }
+      }
+    } catch {
+      // Fallback silently if offline or backend is unreachable
+    }
+  }
+
+  return app;
 }
 
 /**
