@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { UnofficialBanner } from "@/components/UnofficialBanner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,6 +54,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col font-sans">
         <ThemeProvider>
           <Navbar />
+          <UnofficialBanner />
           <main className="flex-1">{children}</main>
           <Footer />
         </ThemeProvider>
