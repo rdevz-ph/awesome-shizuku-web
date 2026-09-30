@@ -25,8 +25,8 @@ export function Footer() {
                 >
                   awesome-shizuku
                 </a>{" "}
-                repository. It does not install APKs or manage system permissions.
-                To install and manage apps with Shizuku, use the official{" "}
+                repository. It does not host APKs. To install and manage apps
+                with Shizuku, use the official{" "}
                 <a
                   href="https://github.com/timschneeb/ShizuStore"
                   target="_blank"
@@ -156,13 +156,26 @@ export function Footer() {
                   Catalog JSON API
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="hover:text-foreground text-xs"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mt-8 pt-4 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} ShizuPortal. Curated catalog for Shizuku apps.</p>
-          <p className="font-mono text-[11px]">UI Inspired by Shadcn Neutral</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="font-mono text-[11px]">UI Inspired by Shadcn Neutral</span>
+          </div>
         </div>
       </div>
     </footer>
