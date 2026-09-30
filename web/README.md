@@ -72,6 +72,10 @@ npm run build
 
 This project is configured and validated for standard deployment on Vercel.
 
+### Badge Generation
+
+The "Get it on ShizuStore" badges were created programmatically using Python. See the [Badge Scripts Guide](scripts/README.md) for details and usage.
+
 ## License
 
 This project is open-source software licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). See the [LICENSE](LICENSE) file for details.
