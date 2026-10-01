@@ -3,15 +3,17 @@
 import React, { useState, useMemo } from "react";
 import {
   Search,
-  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   X,
   Check,
 } from "lucide-react";
 import { AppItem, CategoryItem, SortOption } from "@/lib/types";
 import { AppCard } from "./AppCard";
 import { DeepLinkModal } from "./DeepLinkModal";
+import { SortDropdown } from "./SortDropdown";
 
 interface CatalogBrowserProps {
   initialApps: AppItem[];
@@ -39,6 +41,27 @@ export function CatalogBrowser({
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 24;
+
+  // Categories collapse/expand state
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  const COLLAPSED_CATEGORY_LIMIT = 8;
+
+  const visibleCategories = useMemo(() => {
+    if (isCategoriesExpanded || categories.length <= COLLAPSED_CATEGORY_LIMIT) {
+      return categories;
+    }
+    const sliced = categories.slice(0, COLLAPSED_CATEGORY_LIMIT);
+    if (
+      activeCategory !== "all" &&
+      !sliced.some((c) => c.slug === activeCategory)
+    ) {
+      const activeCatItem = categories.find((c) => c.slug === activeCategory);
+      if (activeCatItem) {
+        return [...sliced, activeCatItem];
+      }
+    }
+    return sliced;
+  }, [categories, isCategoriesExpanded, activeCategory]);
 
   // Deep Link Modal state
   const [modalApp, setModalApp] = useState<AppItem | null>(null);
@@ -180,23 +203,13 @@ export function CatalogBrowser({
           </div>
 
           {/* Sort selector */}
-          <div className="relative w-full sm:w-auto shrink-0">
-            <select
-              value={sortBy}
-              onChange={(e) => {
-                setSortBy(e.target.value as SortOption);
-                setCurrentPage(1);
-              }}
-              className="h-10 w-full sm:w-44 appearance-none rounded-xl bg-card border border-input pl-3.5 pr-8 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:border-foreground/30 cursor-pointer shadow-xs"
-            >
-              <option value="stars">Most starred</option>
-              <option value="updated">Recently updated</option>
-              <option value="downloads">Most downloaded</option>
-              <option value="added">Recently added</option>
-              <option value="alphabetical">Alphabetical (A-Z)</option>
-            </select>
-            <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          </div>
+          <SortDropdown
+            value={sortBy}
+            onChange={(newSort) => {
+              setSortBy(newSort);
+              setCurrentPage(1);
+            }}
+          />
         </div>
 
         {/* Filter Badges & Toggle Chips - Shadcn Pills */}
@@ -266,9 +279,9 @@ export function CatalogBrowser({
           )}
         </div>
 
-        {/* Categories scrollable pill selector - Shadcn Pills */}
+        {/* Categories pill selector - Shadcn Pills */}
         <div className="pt-1">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => {
@@ -283,7 +296,7 @@ export function CatalogBrowser({
               </span>
             </button>
 
-            {categories.map((cat) => {
+            {visibleCategories.map((cat) => {
               const isSelected = activeCategory === cat.slug;
               return (
                 <button
@@ -302,6 +315,31 @@ export function CatalogBrowser({
                 </button>
               );
             })}
+
+            {categories.length > COLLAPSED_CATEGORY_LIMIT && (
+              <button
+                type="button"
+                onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}
+                className="shadcn-pill text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
+              >
+                {isCategoriesExpanded ? (
+                  <>
+                    <span>Show less</span>
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  </>
+                ) : (
+                  <>
+                    <span>Show more</span>
+                    {categories.length > visibleCategories.length && (
+                      <span className="shadcn-pill-count">
+                        +{categories.length - visibleCategories.length}
+                      </span>
+                    )}
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

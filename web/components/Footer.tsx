@@ -156,14 +156,6 @@ export function Footer() {
                   Catalog JSON API
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="hover:text-foreground text-xs"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
             </ul>
           </div>
         </div>

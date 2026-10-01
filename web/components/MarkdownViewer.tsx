@@ -101,12 +101,31 @@ export function MarkdownViewer({ content, repoOwner, repoName }: MarkdownViewerP
               <table className="w-full text-xs text-left" {...props} />
             </div>
           ),
-          th: ({ ...props }) => (
-            <th className="p-2 border-b border-border bg-secondary/60 font-semibold text-foreground" {...props} />
-          ),
-          td: ({ ...props }) => (
-            <td className="p-2 border-b border-border/60 text-muted-foreground" {...props} />
-          ),
+          tr: ({ ...props }) => {
+            const rest = { ...(props as React.HTMLAttributes<HTMLTableRowElement> & { vAlign?: string }) };
+            delete rest.vAlign;
+            return <tr {...rest} />;
+          },
+          th: ({ ...props }) => {
+            const { vAlign, className = "", ...rest } = props as React.ThHTMLAttributes<HTMLTableCellElement> & { vAlign?: string };
+            const alignClass = vAlign === "top" ? "align-top" : vAlign === "bottom" ? "align-bottom" : "";
+            return (
+              <th
+                className={`p-2 border-b border-border bg-secondary/60 font-semibold text-foreground ${alignClass} ${className}`.trim()}
+                {...rest}
+              />
+            );
+          },
+          td: ({ ...props }) => {
+            const { vAlign, className = "", ...rest } = props as React.TdHTMLAttributes<HTMLTableCellElement> & { vAlign?: string };
+            const alignClass = vAlign === "top" ? "align-top" : vAlign === "bottom" ? "align-bottom" : "";
+            return (
+              <td
+                className={`p-2 border-b border-border/60 text-muted-foreground ${alignClass} ${className}`.trim()}
+                {...rest}
+              />
+            );
+          },
           hr: () => <hr className="my-4 border-border" />,
         }}
       >
