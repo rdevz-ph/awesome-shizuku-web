@@ -41,6 +41,7 @@ export interface AppItem {
   fdroidUrl?: string;
   websiteUrl?: string;
   shizuStoreDeepLink?: string;
+  downloadUrl?: string;
 }
 
 export interface CategoryItem {

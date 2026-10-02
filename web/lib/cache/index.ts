@@ -8,7 +8,7 @@ import { fetchLiveRepoReadme } from "@/lib/metadata/readme";
 
 const CACHE_DIR = path.join(process.cwd(), ".cache");
 const CACHE_FILE = path.join(CACHE_DIR, "catalog.json");
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 let memoryCache: CatalogData | null = null;
 let lastSyncTime = 0;
@@ -59,7 +59,7 @@ async function fetchShizuStoreBackendApps(): Promise<Map<string, ShizuBackendApp
         `https://shizustore.timschneeberger.me/v1/apps?page=${page}&pageSize=200`,
         {
           headers: { "User-Agent": "ShizuStoreWeb/1.0" },
-          next: { revalidate: 3600 },
+          next: { revalidate: 900 },
         }
       );
       if (!res.ok) break;
@@ -223,37 +223,58 @@ export async function getAppBySlug(slug: string): Promise<AppItem | null> {
   const [liveReadmeResult] = await Promise.allSettled([
     fetchLiveRepoReadme(app),
     (async () => {
-      if (!app.screenshots || app.screenshots.length === 0) {
-        try {
-          const res = await fetch(
-            `https://shizustore.timschneeberger.me/v1/apps/${encodeURIComponent(app.slug)}`,
-            {
-              headers: { "User-Agent": "ShizuStoreWeb/1.0" },
-              next: { revalidate: 3600 },
-            }
-          );
-          if (res.ok) {
-            const detail = await res.json();
-            if (Array.isArray(detail.screenshots) && detail.screenshots.length > 0) {
-              app.screenshots = detail.screenshots;
-            }
-            if (detail.fullDescription && !app.fullDescription) {
-              app.fullDescription = detail.fullDescription;
-            }
-            if (detail.changelog && !app.changelog) {
-              app.changelog = detail.changelog;
-            }
-            if (
-              Array.isArray(detail.permissions) &&
-              detail.permissions.length > 0 &&
-              (!app.permissions || app.permissions.length === 0)
-            ) {
-              app.permissions = detail.permissions;
-            }
+      try {
+        const res = await fetch(
+          `https://shizustore.timschneeberger.me/v1/apps/${encodeURIComponent(app.slug)}`,
+          {
+            headers: { "User-Agent": "ShizuStoreWeb/1.0" },
+            next: { revalidate: 60 },
           }
-        } catch {
-          // Fallback silently if offline or backend is unreachable
+        );
+        if (res.ok) {
+          const detail = await res.json();
+          if (detail.versionName) {
+            app.versionName = detail.versionName;
+          }
+          if (detail.versionCode) {
+            app.versionCode = detail.versionCode;
+          }
+          if (detail.versionUpdatedAt) {
+            app.versionUpdatedAt = detail.versionUpdatedAt;
+          }
+          if (detail.updatedAt) {
+            app.updatedAt = detail.updatedAt;
+          }
+          if (detail.releaseDate) {
+            app.releaseDate = detail.releaseDate;
+          }
+          if (detail.downloadTotal !== undefined) {
+            app.downloadTotal = detail.downloadTotal;
+          }
+          if (detail.installCount !== undefined) {
+            app.installCount = detail.installCount;
+          }
+          if (detail.downloadUrl) {
+            app.downloadUrl = detail.downloadUrl;
+          }
+          if (Array.isArray(detail.screenshots) && detail.screenshots.length > 0) {
+            app.screenshots = detail.screenshots;
+          }
+          if (detail.changelog) {
+            app.changelog = detail.changelog;
+          }
+          if (
+            Array.isArray(detail.permissions) &&
+            detail.permissions.length > 0
+          ) {
+            app.permissions = detail.permissions;
+          }
+          if (detail.fullDescription && !app.fullDescription) {
+            app.fullDescription = detail.fullDescription;
+          }
         }
+      } catch {
+        // Fallback silently if offline or backend is unreachable
       }
     })(),
   ]);

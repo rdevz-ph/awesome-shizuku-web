@@ -1,14 +1,16 @@
-import { NextResponse } from "next/server";
-import { getCatalog } from "@/lib/cache";
+import { NextRequest, NextResponse } from "next/server";
+import { getCatalog, syncCatalog } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const catalog = await getCatalog();
+    const { searchParams } = new URL(request.url);
+    const forceRefresh = searchParams.get("refresh") === "true";
+    const catalog = forceRefresh ? await syncCatalog(true) : await getCatalog();
     return NextResponse.json(catalog, {
       headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800",
       },
     });
   } catch (error: unknown) {
