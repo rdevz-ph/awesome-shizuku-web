@@ -13,6 +13,14 @@ interface ShareAppModalProps {
 
 type ShareFormat = "badge" | "deeplink" | "markdown" | "url" | "html";
 
+const SHARE_TABS: { id: ShareFormat; label: string }[] = [
+  { id: "badge", label: "Badge" },
+  { id: "deeplink", label: "Deep Link" },
+  { id: "markdown", label: "Markdown" },
+  { id: "url", label: "URL" },
+  { id: "html", label: "HTML" },
+];
+
 const subscribeEmpty = () => () => {};
 
 export function ShareAppModal({ app, isOpen, onClose }: ShareAppModalProps) {
@@ -73,56 +81,34 @@ export function ShareAppModal({ app, isOpen, onClose }: ShareAppModalProps) {
         </div>
 
         {/* Live Badge Preview */}
-        <div className="py-6 px-4 rounded-xl border border-border bg-secondary/30 flex flex-col items-center justify-center gap-2">
+        <div className="w-fit mx-auto py-3 px-6 rounded-xl border border-border bg-secondary/25 flex items-center justify-center shadow-2xs">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={badgeImageUrl}
             alt="Get it on ShizuStore"
-            className="h-20 sm:h-24 w-auto max-w-full object-contain filter drop-shadow-sm"
+            className="h-20 sm:h-22 w-auto max-w-full object-contain filter drop-shadow-sm"
           />
         </div>
 
-        {/* Format Selector Pills */}
-        <div className="grid grid-cols-5 gap-1 p-1 rounded-xl bg-secondary/40 border border-border/60">
-          <button
-            type="button"
-            onClick={() => setActiveTab("badge")}
-            className={activeTab === "badge" ? "shadcn-pill-active justify-center text-center w-full" : "shadcn-pill justify-center text-center w-full border-transparent bg-transparent"}
-          >
-            <span>Badge</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("deeplink")}
-            className={activeTab === "deeplink" ? "shadcn-pill-active justify-center text-center w-full" : "shadcn-pill justify-center text-center w-full border-transparent bg-transparent"}
-          >
-            <span>Deep Link</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("markdown")}
-            className={activeTab === "markdown" ? "shadcn-pill-active justify-center text-center w-full" : "shadcn-pill justify-center text-center w-full border-transparent bg-transparent"}
-          >
-            <span>Markdown</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("url")}
-            className={activeTab === "url" ? "shadcn-pill-active justify-center text-center w-full" : "shadcn-pill justify-center text-center w-full border-transparent bg-transparent"}
-          >
-            <span>URL</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("html")}
-            className={activeTab === "html" ? "shadcn-pill-active justify-center text-center w-full" : "shadcn-pill justify-center text-center w-full border-transparent bg-transparent"}
-          >
-            <span>HTML</span>
-          </button>
+        {/* Format Selector Tabs */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary/40 border border-border/60 overflow-x-auto scrollbar-none no-scrollbar sm:grid sm:grid-cols-5">
+          {SHARE_TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`shrink-0 flex-1 sm:w-full h-8 px-3 sm:px-1 rounded-lg text-xs font-medium transition-colors duration-150 text-center flex items-center justify-center select-none whitespace-nowrap cursor-pointer outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-ring border ${
+                  isActive
+                    ? "bg-card text-foreground shadow-xs font-semibold border-border"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                }`}
+              >
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Code Content Container */}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useSyncExternalStore } from "react";
 import {
   Search,
   ChevronLeft,
@@ -9,11 +9,30 @@ import {
   ChevronUp,
   X,
   Check,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { AppItem, CategoryItem, SortOption } from "@/lib/types";
 import { AppCard } from "./AppCard";
 import { DeepLinkModal } from "./DeepLinkModal";
 import { SortDropdown } from "./SortDropdown";
+
+const subscribeViewMode = (callback: () => void) => {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+};
+
+const getViewModeSnapshot = (): "grid" | "list" => {
+  try {
+    const val = localStorage.getItem("shizu_view_mode");
+    if (val === "grid" || val === "list") return val;
+  } catch {
+    // Ignore in restricted environments
+  }
+  return "grid";
+};
+
+const getViewModeServerSnapshot = (): "grid" | "list" => "grid";
 
 interface CatalogBrowserProps {
   initialApps: AppItem[];
@@ -41,6 +60,22 @@ export function CatalogBrowser({
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 24;
+
+  // View mode (grid vs list) synchronized with localStorage
+  const viewMode = useSyncExternalStore(
+    subscribeViewMode,
+    getViewModeSnapshot,
+    getViewModeServerSnapshot
+  );
+
+  const handleViewModeChange = (mode: "grid" | "list") => {
+    try {
+      localStorage.setItem("shizu_view_mode", mode);
+      window.dispatchEvent(new Event("storage"));
+    } catch {
+      // Ignore
+    }
+  };
 
   // Categories collapse/expand state
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
@@ -345,8 +380,8 @@ export function CatalogBrowser({
       </div>
 
       {/* Results Header */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-        <span>
+      <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 gap-2">
+        <div className="truncate">
           Showing <strong className="text-foreground">{sortedApps.length}</strong>{" "}
           {sortedApps.length === 1 ? "application" : "applications"}
           {activeCategory !== "all" && (
@@ -358,23 +393,70 @@ export function CatalogBrowser({
               </strong>
             </>
           )}
-        </span>
-        <span className="font-mono text-[11px]">
-          Page {currentPage} of {totalPages || 1}
-        </span>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <span className="font-mono text-[11px] hidden sm:inline">
+            Page {currentPage} of {totalPages || 1}
+          </span>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center p-0.5 rounded-lg bg-card border border-border/70 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => handleViewModeChange("grid")}
+              aria-label="Grid view"
+              title="Grid view"
+              className={`h-7 w-7 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
+                viewMode === "grid"
+                  ? "bg-secondary text-foreground shadow-2xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleViewModeChange("list")}
+              aria-label="List view"
+              title="List view"
+              className={`h-7 w-7 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
+                viewMode === "list"
+                  ? "bg-secondary text-foreground shadow-2xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <List className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* App Grid */}
+      {/* App Grid or List */}
       {paginatedApps.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginatedApps.map((app) => (
-            <AppCard
-              key={app.slug}
-              app={app}
-              onGetOnShizuStore={handleGetOnShizuStore}
-            />
-          ))}
-        </div>
+        viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginatedApps.map((app) => (
+              <AppCard
+                key={app.slug}
+                app={app}
+                layout="grid"
+                onGetOnShizuStore={handleGetOnShizuStore}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {paginatedApps.map((app) => (
+              <AppCard
+                key={app.slug}
+                app={app}
+                layout="list"
+                onGetOnShizuStore={handleGetOnShizuStore}
+              />
+            ))}
+          </div>
+        )
       ) : (
         <div className="py-20 text-center rounded-2xl bg-card border border-border p-8 space-y-3">
           <div className="w-10 h-10 mx-auto rounded-xl bg-secondary flex items-center justify-center text-muted-foreground">
