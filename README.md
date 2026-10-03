@@ -1,5 +1,8 @@
 # awesome-shizuku
 
+> [!NOTE]
+> This is a fork of [awesome-shizuku](https://github.com/timschneeb/awesome-shizuku). If you want to contribute (such as adding your app), please consider opening a pull request directly on the [main repository](https://github.com/timschneeb/awesome-shizuku).
+
 ### Languages
 English | [简体中文](/README_cn.md) | [繁體中文](/README_tw.md)
 
