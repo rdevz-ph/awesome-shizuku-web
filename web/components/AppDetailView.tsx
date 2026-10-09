@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Download,
@@ -29,6 +29,7 @@ import { DeepLinkModal } from "./DeepLinkModal";
 import { ShareAppModal } from "./ShareAppModal";
 import { AppCard } from "./AppCard";
 import { MarkdownViewer } from "./MarkdownViewer";
+import { getShizuStoreDeepLink, getShizuStoreIntentUri } from "@/lib/deeplink";
 
 interface AppDetailViewProps {
   app: AppItem;
@@ -42,7 +43,45 @@ export function AppDetailView({ app, relatedApps }: AppDetailViewProps) {
   const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState<number | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isChangelogExpanded, setIsChangelogExpanded] = useState(false);
+  const [showAutoOpenBanner, setShowAutoOpenBanner] = useState(false);
   const screenshotScrollRef = useRef<HTMLDivElement>(null);
+
+  const deepLink = app.shizuStoreDeepLink || getShizuStoreDeepLink(app.slug, app.packageName);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const userAgent = navigator.userAgent || "";
+    const isAndroid = /Android/i.test(userAgent);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const disabled = urlParams.get("web") === "1" || urlParams.get("no_redirect") === "1";
+    const forceLaunch = urlParams.get("autolaunch") === "1" || urlParams.get("deeplink") === "1";
+
+    if (disabled) return;
+
+    if (isAndroid || forceLaunch) {
+      const sessionKey = `shizustore_auto_opened_${app.slug}`;
+      const alreadyAttempted = sessionStorage.getItem(sessionKey);
+
+      if (!alreadyAttempted) {
+        sessionStorage.setItem(sessionKey, "1");
+        const intentUri = getShizuStoreIntentUri(app.slug, app.packageName);
+
+        try {
+          window.location.href = intentUri;
+        } catch {
+          window.location.href = deepLink;
+        }
+      }
+
+      const timer = setTimeout(() => {
+        setShowAutoOpenBanner(true);
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [app.slug, app.packageName, app.shizuStoreDeepLink, deepLink]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return null;
@@ -79,6 +118,41 @@ export function AppDetailView({ app, relatedApps }: AppDetailViewProps) {
 
   return (
     <div className="space-y-8">
+      {/* Auto Deep Link Prompt Banner for Android */}
+      {showAutoOpenBanner && (
+        <div className="rounded-xl border border-border bg-card p-3 shadow-xs flex items-center justify-between gap-3 text-foreground">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-secondary border border-border p-1 flex items-center justify-center shrink-0">
+              <Smartphone className="w-4 h-4 text-foreground" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-foreground truncate">
+                Open in ShizuStore app
+              </p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                Install silently with Shizuku permissions
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <a
+              href={deepLink}
+              className="h-7 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium flex items-center gap-1 transition-opacity hover:opacity-90"
+            >
+              <span>Open</span>
+            </a>
+            <button
+              type="button"
+              onClick={() => setShowAutoOpenBanner(false)}
+              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+              aria-label="Dismiss banner"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumb */}
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Link href="/" className="hover:text-foreground flex items-center gap-1">

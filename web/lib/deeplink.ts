@@ -14,3 +14,25 @@ export function getShizuStoreDeepLink(slug?: string, packageName?: string): stri
   }
   return "shizustore://apps/";
 }
+
+/**
+ * Generates Android Intent URI for ShizuStore.
+ * Enables Chrome Android to launch ShizuStore if installed,
+ * or safely fall back to the web portal URL without showing net::ERR_UNKNOWN_URL_SCHEME.
+ */
+export function getShizuStoreIntentUri(
+  slug?: string,
+  packageName?: string,
+  fallbackUrl?: string
+): string {
+  const target = slug
+    ? `apps/${encodeURIComponent(slug)}`
+    : packageName
+    ? `apps/?package=${encodeURIComponent(packageName)}`
+    : "apps/";
+  const fallback = fallbackUrl
+    ? `;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)}`
+    : "";
+  return `intent://${target}#Intent;scheme=shizustore;package=me.timschneeberger.shizustore${fallback};end`;
+}
+
