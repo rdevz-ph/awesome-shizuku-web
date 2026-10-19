@@ -14,6 +14,7 @@ This sublist only contains applications that are closed-source.
 ## Table of contents
 
 - [Closed-source apps](#closed-source-apps)
+  - [Android Auto](#android-auto)
   - [Audio](#audio)
   - [Automation](#automation)
   - [Customization](#customization)
@@ -35,6 +36,10 @@ This sublist only contains applications that are closed-source.
 
 ## Closed-source apps
 
+### Android Auto
+
+* [ScreenOnAuto](https://screenonauto.lzn.idv.tw/) - Mirrors the phone screen to Android Auto with touch forwarding and media controls. Optional Shizuku/root turns the phone screen off, adds real touch injection (long-press, drag, multi-finger) and matches the phone screen to the car `Proprietary`
+
 ### Audio
 
 * [Call Recorder (Skvalex)](https://callrecorder.skvalex.com/get) `Paid` 💰 - Call recorder `Proprietary`
@@ -49,6 +54,7 @@ This sublist only contains applications that are closed-source.
 ### Customization
 
 * [AAAD](https://github.com/shmykelsa/AAAD) `IAP` 💰 - Downloads popular Android Auto 3rd party apps and installs on Android Auto `Proprietary`
+* [GMD Gestures](https://play.google.com/store/apps/details?id=com.goodmooddroid.gestures) `IAP` 💰 - Create system-wide multitouch and custom-drawn gestures anywhere on the screen to navigate, launch apps and shortcuts, or control device settings. `Proprietary`
 * [SetEdit: Settings Editor](https://play.google.com/store/apps/details?id=com.netvor.settings.database.editor) - View and edit settings from the system, global, and secure tables `Proprietary`
 * [UbikiTouch](https://play.google.com/store/apps/details?id=eu.toneiv.ubktouch) `IAP` 💰 - Add custom swipe-from-edge gestures to Android `Proprietary`
 * [zFont 3](https://play.google.com/store/apps/details?id=com.htetznaing.zfont2) `Ads` `IAP` 💰 - Emoji & Font Changer `Proprietary`
@@ -99,6 +105,7 @@ This sublist only contains applications that are closed-source.
 ### Power management
 
 * [Battery Guru](https://play.google.com/store/apps/details?id=com.paget96.batteryguru) `Ads` `IAP` 💰 - Battery health monitor with actual capacity in mAh, charging speed, temperature and usage tracking. Can request additional permissions via Shizuku. `Proprietary`
+* [Battery Health Tracker](https://github.com/FrancescoMin/batteryhealthtracker) - Advanced hardware battery health, dynamic BMS telemetry, and degradation tracker for Oppo, OnePlus, Realme, Samsung, and Nothing devices via Shizuku. `Proprietary` `No Ads`
 * [Extinguish](https://play.google.com/store/apps/details?id=own.moderpach.extinguish) - Extinguish turns your screen off but keeps your device awake `Proprietary`
 * [FDE.AI](https://github.com/feravolt/FDE.AI-docs/releases) `IAP` 💰 - All-in-One optimizer for Android `Proprietary`
 * [Nightcap](https://play.google.com/store/apps/details?id=com.sleepshutdown.app) `IAP` 💰 - Power off your phone automatically for focus, sleep or any scheduled time you pick `Proprietary`
@@ -134,4 +141,3 @@ This sublist only contains applications that are closed-source.
 #### MIUI
 
 * [FpsSwitcher](https://play.google.com/store/apps/details?id=com.ysy.fpsswitcher) `Paid` 💰 - Refresh rate shortcut switch for HyperOS/MIUI `Proprietary`
-

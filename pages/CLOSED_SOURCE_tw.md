@@ -14,6 +14,7 @@
 ## 目錄
 
 - [Closed-source apps](#closed-source-apps)
+  - [Android Auto](#android-auto)
   - [Audio](#audio)
   - [Automation](#automation)
   - [Customization](#customization)
@@ -34,6 +35,10 @@
 --------------------
 
 ## Closed-source apps
+
+### Android Auto
+
+* [ScreenOnAuto](https://screenonauto.lzn.idv.tw/) - 將手機螢幕鏡像至 Android Auto，支援觸控轉發與多媒體控制。選用 Shizuku/root 可關閉手機螢幕、啟用真實觸控注入（長按、拖曳、多指操作），並讓手機畫面比例對齊車機 `Proprietary`
 
 ### Audio
 
@@ -99,6 +104,7 @@
 ### Power management
 
 * [Battery Guru](https://play.google.com/store/apps/details?id=com.paget96.batteryguru) `Ads` `IAP` 💰 - Battery health monitor with actual capacity in mAh, charging speed, temperature and usage tracking. Can request additional permissions via Shizuku. `Proprietary`
+* [Battery Health Tracker](https://github.com/FrancescoMin/batteryhealthtracker) - Advanced hardware battery health, dynamic BMS telemetry, and degradation tracker for Oppo, OnePlus, Realme, Samsung, and Nothing devices via Shizuku. `Proprietary` `No Ads`
 * [Extinguish](https://play.google.com/store/apps/details?id=own.moderpach.extinguish) - 熄滅關閉螢幕，但保持裝置喚醒狀態 `Proprietary`
 * [FDE.AI](https://github.com/feravolt/FDE.AI-docs/releases) `IAP` 💰 - All-in-One optimizer for Android `Proprietary`
 * [Nightcap](https://play.google.com/store/apps/details?id=com.sleepshutdown.app) `IAP` 💰 - Power off your phone automatically for focus, sleep or any scheduled time you pick `Proprietary`
